@@ -3,70 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether (以太) | 次世代社交</title>
+    <title>Aether Network</title>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); display: flex; flex-direction: column; height: 100vh; justify-content: center; align-items: center; }
+        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+        
+        :root {
+            --wechat-green: #07c160;
+            --bg-light: #f7f7f7;
+            --text-dark: #191919;
+            --text-gray: #7f7f7f;
+            --border-color: #eaeaea;
+        }
+
+        body { font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0; background: #e0e6ed; display: flex; height: 100vh; justify-content: center; align-items: center; -webkit-tap-highlight-color: transparent; }
         .hidden { display: none !important; }
-        #app { max-width: 400px; width: 100%; height: 90vh; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); border-radius: 24px; box-shadow: 0 8px 32px rgba(31,38,135,0.15); display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .auth-container { padding: 40px 30px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-        .app-title { font-size: 32px; font-weight: 600; color: #3b4252; margin-bottom: 5px; }
-        .app-subtitle { font-size: 13px; color: #5e81ac; margin-bottom: 30px; }
-        input[type="text"], input[type="password"] { width: 100%; padding: 14px; margin: 10px 0; background: rgba(255,255,255,0.8); border: 1px solid #e5e9f0; border-radius: 12px; box-sizing: border-box; outline: none; }
-        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; margin-top: 15px; }
-        .btn-outline { background: transparent; color: #764ba2; border: 2px solid #764ba2; margin-top: 10px; }
-        .chat-header { background: rgba(255,255,255,0.5); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.5); font-weight: 600; color: #2e3440; backdrop-filter: blur(5px); cursor: pointer; position: relative; }
-        .admin-btn { position: absolute; right: 20px; top: 22px; font-size: 12px; color: #88c0d0; cursor: pointer; }
-        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { display: flex; align-items: flex-end; gap: 10px; }
+        
+        /* 独立外壳模拟高级手机质感 */
+        #app { max-width: 412px; width: 100%; height: 92vh; background: var(--bg-light); border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; position: relative; border: 4px solid #fff; }
+        
+        /* 1. 登录注册页面 (高级极简风) */
+        .auth-container { padding: 40px 30px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; background: #fff; }
+        .app-logo { font-size: 38px; font-weight: 600; color: var(--text-dark); letter-spacing: -1px; margin-bottom: 5px; }
+        .app-subtitle { font-size: 13px; color: var(--text-gray); margin-bottom: 40px; }
+        .auth-input { width: 100%; padding: 16px; margin: 8px 0; background: #f5f5f7; border: 1px solid transparent; border-radius: 14px; box-sizing: border-box; outline: none; font-size: 15px; transition: 0.2s; }
+        .auth-input:focus { border-color: var(--wechat-green); background: #fff; }
+        .btn-primary { background: var(--wechat-green); color: white; border: none; padding: 16px; border-radius: 14px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; margin-top: 20px; transition: 0.2s; }
+        .btn-primary:active { opacity: 0.8; }
+        .btn-outline { background: transparent; color: var(--text-dark); border: 1px solid #d2d2d7; margin-top: 12px; }
+
+        /* 统一标准头部 */
+        .header-bar { height: 60px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--border-color); font-weight: 600; color: var(--text-dark); font-size: 17px; box-sizing: border-box; }
+        .header-icon { color: var(--text-dark); cursor: pointer; font-size: 14px; font-weight: normal; }
+
+        /* 统一标准容器布局 */
+        .view-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; background: var(--bg-light); padding-bottom: 10px; }
+
+        /* 2. 聊天会话视窗 */
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #f3f3f3; }
+        .message { display: flex; align-items: flex-start; gap: 12px; }
         .message.self { flex-direction: row-reverse; }
-        .message-content { background: white; padding: 12px 16px; border-radius: 18px 18px 18px 4px; max-width: 70%; word-wrap: break-word; font-size: 14px; color: #4c566a; }
-        .message.self .message-content { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); border-radius: 18px 18px 4px 18px; color: #2e3440; }
-        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #eceff4; }
-        .chat-input-area { padding: 15px; background: rgba(255,255,255,0.5); border-top: 1px solid rgba(255,255,255,0.5); }
-        .toolbar { display: flex; gap: 18px; margin-bottom: 12px; color: #5e81ac; padding: 0 5px; }
-        .toolbar svg { width: 22px; height: 22px; cursor: pointer; }
-        .input-wrapper { display: flex; gap: 10px; }
-        .input-wrapper input[type="text"] { flex: 1; margin: 0; background: white; }
-        .input-wrapper button { width: auto; padding: 0 24px; margin: 0; background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #2e3440; border-radius: 12px; }
-        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; display: flex; flex-direction: column; }
+        .message-content { background: white; padding: 11px 15px; border-radius: 4px 16px 16px 16px; max-width: 68%; word-wrap: break-word; font-size: 15px; color: var(--text-dark); line-height: 1.4; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .message.self .message-content { background: var(--wechat-green); color: white; border-radius: 16px 4px 16px 16px; }
+        .avatar { width: 40px; height: 40px; border-radius: 10px; background: #e3e3e3; object-fit: cover; }
+        
+        /* 聊天输入框栏 */
+        .chat-input-area { padding: 10px 16px; background: #fff; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        .input-wrapper { flex: 1; display: flex; gap: 8px; align-items: center; }
+        .input-wrapper input { flex: 1; padding: 10px 14px; background: #f5f5f7; border: none; border-radius: 10px; outline: none; font-size: 15px; }
+        .send-btn { background: var(--wechat-green); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; }
+
+        /* 3. 朋友圈 (Moments) 独立图层样式 */
+        .moments-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 50; display: flex; flex-direction: column; }
+        .moments-timeline { flex: 1; overflow-y: auto; background: #fff; }
+        .moments-cover-wrapper { position: relative; height: 240px; background: #333; margin-bottom: 30px; }
+        .moments-cover { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .moments-my-avatar-box { position: absolute; right: 24px; bottom: -20px; display: flex; align-items: center; gap: 12px; }
+        .moments-my-name { color: #fff; font-weight: 600; font-size: 16px; text-shadow: 0 2px 4px rgba(0,0,0,0.6); margin-bottom: 20px; }
+        .moments-my-avatar { width: 70px; height: 70px; border-radius: 12px; border: 2px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        /* 朋友圈单条动态 */
+        .moment-card { display: flex; padding: 20px 16px; border-bottom: 1px solid var(--border-color); gap: 12px; }
+        .moment-user-name { color: #576b95; font-weight: 600; font-size: 15px; margin: 0 0 6px 0; }
+        .moment-text { color: var(--text-dark); font-size: 15px; line-height: 1.4; margin: 0 0 10px 0; }
+        .moment-time-row { display: flex; justify-content: space-between; align-items: center; color: var(--text-gray); font-size: 12px; }
+        .moment-action-btn { background: #f5f5f7; padding: 4px 8px; border-radius: 4px; color: #576b95; font-weight: 600; cursor: pointer; }
+
+        /* 4. 通用菜单列表配置 (发现与我) */
+        .cell-group { margin-top: 12px; background: #fff; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
+        .cell-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-color); cursor: pointer; background: #fff; }
+        .cell-item:last-child { border-bottom: none; }
+        .cell-left { display: flex; align-items: center; gap: 14px; font-size: 16px; color: var(--text-dark); }
+        .cell-right { color: var(--text-gray); font-size: 14px; display: flex; align-items: center; gap: 6px; }
+
+        /* 5. 底部四大导航栏结构 */
+        .bottom-nav-bar { height: 65px; background: #fff; border-top: 1px solid var(--border-color); display: flex; box-sizing: border-box; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-gray); cursor: pointer; transition: 0.15s; }
+        .nav-item.active { color: var(--wechat-green); }
+        .nav-icon { width: 22px; height: 22px; margin-bottom: 4px; fill: currentColor; }
+        .nav-label { font-size: 11px; font-weight: 500; }
+
+        /* 个人信息卡片(我的) */
+        .me-profile-card { background: #fff; padding: 30px 24px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+        .me-info h3 { margin: 0 0 6px 0; font-size: 20px; color: var(--text-dark); }
+        .me-info p { margin: 0; font-size: 13px; color: var(--text-gray); }
+
+        /* 视频通话与全屏弹窗 */
+        #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0b0b0e; z-index: 999; display: flex; flex-direction: column; }
         video { width: 100%; flex: 1; object-fit: cover; }
         .video-controls { position: absolute; bottom: 40px; width: 100%; text-align: center; }
-        .video-controls button { background: #bf616a; width: 64px; height: 64px; border-radius: 50%; padding: 0; }
-        #admin-panel { padding: 20px; flex: 1; overflow-y: auto; background: rgba(255,255,255,0.8); }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 10px; text-align: left; background: white; border-bottom: 1px solid #eee; font-size: 13px; }
-        th { background-color: #eceff4; color: #4c566a; }
+        .video-controls button { background: #ff3b30; width: 64px; height: 64px; border-radius: 50%; padding: 0; border: none; box-shadow: 0 4px 20px rgba(255,59,48,0.3); cursor: pointer; }
+
+        /* 后台管理系统弹窗 */
+        #admin-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 100; padding: 24px; box-sizing: border-box; overflow-y: auto; }
     </style>
 </head>
 <body>
 <div id="app">
     <div id="auth-view" class="auth-container">
-        <div class="app-title">Aether</div>
-        <div class="app-subtitle">无手机号注册 · AI 构建人格</div>
-        <input type="text" id="username" placeholder="输入识别码 (ID)">
-        <input type="password" id="password" placeholder="设置或输入密钥">
-        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin: 15px auto; width: fit-content;"></div>
-        <button onclick="handleAuth(false)">初始化 AI 盲盒 (注册)</button>
-        <button class="btn-outline" onclick="handleAuth(true)">跃迁登录 (已有账号)</button>
-        <p id="auth-msg" style="color: #bf616a; font-size: 13px; margin-top: 15px; min-height: 16px;"></p>
+        <div class="app-logo">Aether</div>
+        <div class="app-subtitle">Premium Serverless Messenger</div>
+        <input type="text" id="username" class="auth-input" placeholder="输入微信号 / 识别码">
+        <input type="password" id="password" class="auth-input" placeholder="输入安全密钥">
+        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin: 15px auto;"></div>
+        
+        <button class="btn-primary" onclick="handleAuth(false)">初始化 AI 盲盒人设 (注册)</button>
+        <button class="btn-primary btn-outline" onclick="handleAuth(true)">登录现有矩阵节点</button>
+        <p id="auth-msg" style="color: #ff3b30; font-size: 13px; margin-top: 15px; min-height: 16px;"></p>
     </div>
 
-    <div id="chat-view" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
-        <div class="chat-header" id="header-area">
-            <span id="my-nickname">信号连接中...</span>
-            <span class="admin-btn" onclick="toggleAdmin(event)">中枢管理</span>
+    <div id="main-view" class="hidden" style="display: flex; flex-direction: column; height: 100%; width: 100%;">
+        <div class="header-bar">
+            <span id="current-tab-title">微信</span>
+            <span class="header-icon" id="admin-entrance" onclick="toggleAdmin(event)">控制台</span>
         </div>
-        <div class="chat-messages" id="message-list"></div>
-        <div class="chat-input-area">
-            <div class="toolbar">
-                <svg title="建立全息视频" onclick="startVideoCall()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+
+        <div id="tab-chats" class="view-content">
+            <div class="chat-messages" id="message-list"></div>
+            <div class="chat-input-area">
+                <svg title="建立全息通话" onclick="startVideoCall()" style="width:26px; height:26px; cursor:pointer; color:var(--text-gray);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                <div class="input-wrapper">
+                    <input type="text" id="msg-input" placeholder="输入新讯息..." onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="send-btn" onclick="sendMessage()">发送</button>
+                </div>
             </div>
-            <div class="input-wrapper">
-                <input type="text" id="msg-input" placeholder="输入讯息..." onkeypress="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()">发送</button>
+        </div>
+
+        <div id="tab-contacts" class="view-content hidden">
+            <div class="cell-group">
+                <div class="cell-item">
+                    <div class="cell-left"><div class="avatar" style="background:#ff9500; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">新</div>新的朋友</div>
+                </div>
+                <div class="cell-item">
+                    <div class="cell-left"><div class="avatar" style="background:#5856d6; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">群</div>群聊架构</div>
+                </div>
+            </div>
+            <div style="padding: 16px; color: var(--text-gray); font-size: 14px;">我的名片协议</div>
+            <div id="contact-qr-box" style="background:#fff; padding:20px; text-align:center; display:flex; justify-content:center;"></div>
+        </div>
+
+        <div id="tab-discover" class="view-content hidden">
+            <div class="cell-group">
+                <div class="cell-item" onclick="openMoments()">
+                    <div class="cell-left">
+                        <svg style="width:22px; height:22px; color:#ff2d55;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                        朋友圈
+                    </div>
+                    <div class="cell-right"><div style="width:10px; height:10px; background:#ff3b30; border-radius:50%;"></div><span>〉</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-me" class="view-content hidden">
+            <div class="me-profile-card">
+                <img class="avatar" id="my-avatar-img" src="" style="width:64px; height:64px; border-radius:14px;">
+                <div class="me-info">
+                    <h3 id="my-name-display">流浪的像素</h3>
+                    <p id="my-id-display">微信号：读取中</p>
+                </div>
+            </div>
+            <div class="cell-group">
+                <div class="cell-item"><div class="cell-left">我的星座</div><div class="cell-right" id="my-zodiac-display">未知</div></div>
+                <div class="cell-item"><div class="cell-left">个人简介</div><div class="cell-right" id="my-bio-display">未设置</div></div>
+            </div>
+        </div>
+
+        <div class="bottom-nav-bar">
+            <div class="nav-item active" id="nav-chats" onclick="switchTab('chats')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                <div class="nav-label">微信</div>
+            </div>
+            <div class="nav-item" id="nav-contacts" onclick="switchTab('contacts')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <div class="nav-label">通讯录</div>
+            </div>
+            <div class="nav-item" id="nav-discover" onclick="switchTab('discover')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L12 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
+                <div class="nav-label">发现</div>
+            </div>
+            <div class="nav-item" id="nav-me" onclick="switchTab('me')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                <div class="nav-label">我</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="moments-view" class="moments-view hidden">
+        <div class="header-bar" style="border-bottom:none; position:absolute; top:0; left:0; width:100%; background:transparent; z-index:10; color:#fff;">
+            <span class="header-icon" onclick="closeMoments()" style="color:#fff; font-size:20px; background:rgba(0,0,0,0.3); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;">〈</span>
+            <span style="color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">朋友圈</span>
+            <span style="visibility:hidden;">右</span>
+        </div>
+        <div class="moments-timeline">
+            <div class="moments-cover-wrapper">
+                <img class="moments-cover" src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80">
+                <div class="moments-my-avatar-box">
+                    <span class="moments-my-name" id="moments-my-name-txt">流浪者</span>
+                    <img class="moments-my-avatar" id="moments-my-avatar-img" src="">
+                </div>
+            </div>
+            <div id="moments-feed-container">
+                <div class="moment-card">
+                    <img class="avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=system">
+                    <div style="flex:1;">
+                        <p class="moment-user-name">以太网络中枢</p>
+                        <p class="moment-text">成功跃迁至次世代分布式存储节点。支持免手机验证与真·P2P全息视频链接架构。 🥂</p>
+                        <div class="moment-time-row"><span>1分钟前</span><span class="moment-action-btn">评论</span></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -74,12 +219,12 @@
     <div id="video-container" class="hidden">
         <video id="remote-video" autoplay playsinline></video>
         <video id="local-video" autoplay playsinline muted style="position: absolute; top: 40px; right: 20px; width: 100px; height: 150px; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px;"></video>
-        <div class="video-controls"><button onclick="endVideoCall()" style="color: white; font-weight: bold;">切断</button></div>
+        <div class="video-controls"><button onclick="endVideoCall()"></button></div>
     </div>
 
     <div id="admin-panel" class="hidden">
-        <h2 style="margin-top: 0; color: #2e3440;">网络中枢管理</h2>
-        <button onclick="document.getElementById('admin-panel').classList.add('hidden'); document.getElementById('chat-view').classList.remove('hidden');" style="background: #d8dee9; color: #4c566a; margin-bottom: 10px; width: auto; padding: 10px 20px;">返回频段</button>
+        <h2 style="margin-top: 0; color: var(--text-dark);">网络中枢会员管理</h2>
+        <button onclick="document.getElementById('admin-panel').classList.add('hidden');" style="background: #e5e5ea; color: var(--text-dark); margin-bottom: 20px; padding: 10px 20px; border:none; border-radius:8px;">返回微信</button>
         <div style="overflow-x: auto;">
             <table id="admin-table">
                 <tr><th>ID</th><th>识别码</th><th>AI 昵称</th><th>星座</th><th>操作</th></tr>
@@ -98,14 +243,15 @@
     let localStream = null;
     const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
+    // --- 1. 深度鉴权模块 ---
     async function handleAuth(isLogin = false) {
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
         const msgEl = document.getElementById('auth-msg');
-        if (!user || !pass) { msgEl.innerText = "请提供识别码与密钥！"; return; }
+        if (!user || !pass) { msgEl.innerText = "识别码与密钥不可为空！"; return; }
         
-        msgEl.style.color = "#5e81ac";
-        msgEl.innerText = isLogin ? "正在核对数据库身份..." : "正在请求 Gemini 生成人格并写入数据库...";
+        msgEl.style.color = "var(--wechat-green)";
+        msgEl.innerText = isLogin ? "正在连接数据矩阵..." : "正在召唤 Gemini 捏合AI盲盒灵魂...";
         
         const endpoint = isLogin ? "/api/login" : "/api/register";
         try {
@@ -117,50 +263,39 @@
             if(data.error) throw new Error(data.error);
             
             currentUser = data.profile; 
-            enterChat();
+            initAetherWechat();
         } catch (e) {
-            msgEl.style.color = "#bf616a";
-            msgEl.innerText = "错误: " + e.message;
+            msgEl.style.color = "#ff3b30";
+            msgEl.innerText = "核对失败: " + e.message;
         }
     }
 
-    function enterChat() {
+    // --- 2. 初始化高仿微信大本营 ---
+    function initAetherWechat() {
         document.getElementById('auth-view').classList.add('hidden');
-        document.getElementById('chat-view').classList.remove('hidden');
-        document.getElementById('my-nickname').innerText = `${currentUser.nickname} (${currentUser.zodiac})`;
+        document.getElementById('main-view').classList.remove('hidden');
         
-        const qrContainer = document.createElement('div');
-        qrContainer.id = "my-qrcode";
-        qrContainer.style.display = "none";
-        qrContainer.style.padding = "20px";
-        qrContainer.style.background = "#fff";
-        qrContainer.style.borderRadius = "12px";
-        qrContainer.style.position = "absolute";
-        qrContainer.style.top = "70px";
-        qrContainer.style.left = "50%";
-        qrContainer.style.transform = "translateX(-50%)";
-        qrContainer.style.boxShadow = "0 10px 30px rgba(0,0,0,0.15)";
-        qrContainer.style.zIndex = "100";
-        qrContainer.style.textAlign = "center";
-        document.getElementById('app').appendChild(qrContainer);
-        
-        new QRCode(qrContainer, {
-            text: `aether:addfriend:${currentUser.username}`, 
-            width: 160, height: 160, colorDark : "#2e3440", colorLight : "#ffffff"
+        // 装填个人中心(我)和朋友圈的动态数据
+        document.getElementById('my-avatar-img').src = currentUser.avatar;
+        document.getElementById('moments-my-avatar-img').src = currentUser.avatar;
+        document.getElementById('my-name-display').innerText = currentUser.nickname;
+        document.getElementById('moments-my-name-txt').innerText = currentUser.nickname;
+        document.getElementById('my-id-display').innerText = `微信号：${currentUser.username}`;
+        document.getElementById('my-zodiac-display').innerText = currentUser.zodiac;
+        document.getElementById('my-bio-display').innerText = currentUser.bio || "无系统签名";
+
+        // 非管理员隐藏控制台按钮
+        if(currentUser.role !== 'admin') {
+            document.getElementById('admin-entrance').style.display = 'none';
+        }
+
+        // 生成通讯录名片二维码
+        document.getElementById('contact-qr-box').innerHTML = "";
+        new QRCode(document.getElementById('contact-qr-box'), {
+            text: `aether:add:${currentUser.username}`, width: 160, height: 160
         });
 
-        document.getElementById('header-area').onclick = (e) => {
-            if(e.target.className === 'admin-btn') return; 
-            const display = qrContainer.style.display;
-            qrContainer.style.display = display === 'none' ? 'block' : 'none';
-            if(qrContainer.style.display === 'block' && qrContainer.children.length === 2) {
-                const bio = document.createElement('p');
-                bio.innerText = currentUser.bio || "这个人很懒，AI 也没辙。";
-                bio.style.color = "#4c566a"; bio.style.fontSize = "13px"; bio.style.marginTop = "15px"; bio.style.fontWeight = "bold";
-                qrContainer.appendChild(bio);
-            }
-        };
-
+        // 打通实时数据管道
         ws = new WebSocket(WS_URL);
         ws.onmessage = async (event) => {
             const msg = JSON.parse(event.data);
@@ -169,9 +304,30 @@
             else if (msg.type === 'answer') { await peerConnection.setRemoteDescription(new RTCSessionDescription(msg.answer)); }
             else if (msg.type === 'ice-candidate') { await peerConnection.addIceCandidate(new RTCIceCandidate(msg.candidate)); }
         };
-        appendMessage("系统: 欢迎加入 Aether 网络。点击上方昵称可查看您的二维码名片与AI简史。", false, "https://api.dicebear.com/7.x/bottts/svg?seed=system");
+
+        appendMessage("系统: 已接入分布式安全通道。点击底部各导航栏可以体验全套微信功能结构。", false, "https://api.dicebear.com/7.x/bottts/svg?seed=system");
     }
 
+    // --- 3. 经典四Tab切页逻辑 ---
+    function switchTab(tabName) {
+        const tabs = ['chats', 'contacts', 'discover', 'me'];
+        tabs.forEach(t => {
+            document.getElementById(`tab-${t}`).classList.add('hidden');
+            document.getElementById(`nav-${t}`).classList.remove('active');
+        });
+        document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        document.getElementById(`nav-${tabName}`).classList.add('active');
+
+        // 动态改顶栏标题
+        const titles = { chats: '微信', contacts: '通讯录', discover: '发现', me: '我' };
+        document.getElementById('current-tab-title').innerText = titles[tabName];
+    }
+
+    // --- 4. 朋友圈交互逻辑 ---
+    function openMoments() { document.getElementById('moments-view').classList.remove('hidden'); }
+    function closeMoments() { document.getElementById('moments-view').classList.add('hidden'); }
+
+    // --- 5. 文字信息分发 ---
     function sendMessage() {
         const input = document.getElementById('msg-input');
         const text = input.value.trim();
@@ -190,6 +346,7 @@
         list.scrollTop = list.scrollHeight; 
     }
 
+    // --- 6. 真·WebRTC 全息音视频通话机制 ---
     async function startVideoCall() {
         document.getElementById('video-container').classList.remove('hidden');
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -223,13 +380,9 @@
         if (localStream) localStream.getTracks().forEach(track => track.stop());
     }
 
+    // --- 7. 管理中枢核心调取 ---
     async function toggleAdmin(event) {
-        event.stopPropagation(); 
-        if (currentUser?.role !== 'admin') {
-            alert("权限不足：你需要管理员权限才能访问中枢。 (请用账号 admin 注册/登录)");
-            return;
-        }
-        document.getElementById('chat-view').classList.add('hidden');
+        event.stopPropagation();
         document.getElementById('admin-panel').classList.remove('hidden');
         try {
             const res = await fetch(API_BASE + "/api/admin/users");
@@ -237,7 +390,7 @@
             let tableHTML = `<tr><th>ID</th><th>识别码</th><th>AI 昵称</th><th>星座</th><th>操作</th></tr>`;
             users.forEach(u => {
                 tableHTML += `<tr><td>${u.id}</td><td>${u.username}</td><td>${u.nickname}</td><td>${u.zodiac}</td>
-                <td><button style="padding: 4px 8px; font-size: 12px; width:auto; background: #bf616a; border-radius:4px;">阻断</button></td></tr>`;
+                <td><button style="padding: 4px 8px; font-size: 12px; width:auto; background: #ff3b30; color:#fff; border:none; border-radius:4px; cursor:pointer;">阻断</button></td></tr>`;
             });
             document.getElementById('admin-table').innerHTML = tableHTML;
         } catch (e) { alert("拉取数据失败：" + e.message); }
