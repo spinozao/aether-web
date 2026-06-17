@@ -108,7 +108,7 @@
         <div class="app-subtitle">标记老宝贝的生活 · AI 盲盒捏脸</div>
         <input type="text" id="username" class="auth-input" placeholder="输入账号 / 识别码">
         <input type="password" id="password" class="auth-input" placeholder="输入通关密码">
-        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin: 15px auto;"></div>
+        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin: 15px auto; width: fit-content;"></div>
         <button class="btn-primary" onclick="handleAuth(false)">发布我的生活盲盒 (注册)</button>
         <button class="btn-primary btn-outline" onclick="handleAuth(true)">登录现有社区节点</button>
         <p id="auth-msg" style="color: var(--xhs-red); font-size: 13px; margin-top: 15px;"></p>
@@ -166,7 +166,7 @@
         </div>
         <button class="btn-primary" onclick="submitNote()">立即种草发布</button>
         <button class="btn-primary btn-outline" onclick="closePublishModal()">取消返回</button>
-        <p id="pub-msg" style="color:var(--xhs-red); font-size:13px; text-align:center; margin-top:12px; min-height:16px;"></p>
+        <p id="pub-msg" style="color:var(--xhs-red); font-size:13px; text-align:center; margin-top:12px; min-height:16px; word-break:break-all;"></p>
     </div>
 
     <div id="video-container" class="fullscreen-modal hidden">
@@ -235,7 +235,6 @@
         };
     }
 
-    // 载入瀑布流动态
     async function loadWaterfall() {
         try {
             const res = await fetch(API_BASE + "/api/notes");
@@ -261,7 +260,6 @@
         } catch (e) { console.error("瀑布流同步失败", e); }
     }
 
-    // 图文发布控制
     function openPublishModal() { 
         document.getElementById('pub-msg').innerText = "";
         document.getElementById('publish-modal').classList.remove('hidden'); 
@@ -274,22 +272,22 @@
         const msgEl = document.getElementById('pub-msg');
         if (!title || !fileInput.files[0]) { msgEl.innerText = "标题和照片缺一不可哦！"; return; }
 
-        msgEl.innerText = "正在无损压缩图像中...";
+        msgEl.innerText = "正在极限无损压缩图像中...";
         const reader = new FileReader();
         reader.readAsDataURL(fileInput.files[0]);
         reader.onload = function (e) {
             const img = new Image();
             img.src = e.target.result;
             img.onload = async function () {
-                // 前端自动压缩
+                // 更激进的极限分辨率压缩：最大宽度 300px，画质调至 0.5，体积直接压到 15-30KB 级别
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                const maxW = 400;
+                const maxW = 300;
                 const scale = maxW / img.width;
                 canvas.width = maxW;
                 canvas.height = img.height * scale;
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.5);
 
                 try {
                     const response = await fetch(API_BASE + "/api/notes", {
@@ -299,18 +297,22 @@
                             avatar_url: currentUser.avatar, title: title, image_data: compressedBase64
                         })
                     });
+                    
+                    const resData = await response.json();
                     if (response.ok) {
                         document.getElementById('note-title').value = "";
                         fileInput.value = "";
                         closePublishModal();
                         loadWaterfall(); 
-                    } else { throw new Error("同步失败"); }
-                } catch (err) { msgEl.innerText = err.message; }
+                    } else { 
+                        // 精准透视后端传过来的核心报错，不再盲盒式显示“发布失败”
+                        throw new Error(resData.error || "服务器拒绝写入存储"); 
+                    }
+                } catch (err) { msgEl.innerText = "错误: " + err.message; }
             }
         }
     }
 
-    // 三大 Tab 切换
     function switchTab(tabName) {
         ['home', 'messages', 'me'].forEach(t => {
             document.getElementById(`tab-${t}`).classList.add('hidden');
@@ -336,7 +338,6 @@
         list.appendChild(msgDiv); list.scrollTop = list.scrollHeight; 
     }
 
-    // WebRTC 音视频全息通话
     async function startVideoCall() {
         document.getElementById('video-container').classList.remove('hidden');
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
