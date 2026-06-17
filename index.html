@@ -1,2 +1,173 @@
-const API_REGISTER_URL = "https://aether-api.你的子域名.workers.dev/api/register"; 
-const WS_URL = "wss://aether-api.你的子域名.workers.dev";
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aether (以太) | 次世代社交</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); display: flex; flex-direction: column; height: 100vh; justify-content: center; align-items: center; }
+        .hidden { display: none !important; }
+        #app { max-width: 400px; width: 100%; height: 90vh; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); border-radius: 24px; box-shadow: 0 8px 32px rgba(31,38,135,0.15); display: flex; flex-direction: column; overflow: hidden; }
+        .auth-container { padding: 40px 30px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .app-title { font-size: 32px; font-weight: 600; color: #3b4252; margin-bottom: 5px; }
+        .app-subtitle { font-size: 13px; color: #5e81ac; margin-bottom: 30px; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 14px; margin: 10px 0; background: rgba(255,255,255,0.8); border: 1px solid #e5e9f0; border-radius: 12px; box-sizing: border-box; outline: none; }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; margin-top: 15px; }
+        .chat-header { background: rgba(255,255,255,0.5); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.5); font-weight: 600; color: #2e3440; backdrop-filter: blur(5px); }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { display: flex; align-items: flex-end; gap: 10px; }
+        .message.self { flex-direction: row-reverse; }
+        .message-content { background: white; padding: 12px 16px; border-radius: 18px 18px 18px 4px; max-width: 70%; word-wrap: break-word; font-size: 14px; color: #4c566a; }
+        .message.self .message-content { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); border-radius: 18px 18px 4px 18px; color: #2e3440; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #eceff4; }
+        .chat-input-area { padding: 15px; background: rgba(255,255,255,0.5); border-top: 1px solid rgba(255,255,255,0.5); }
+        .toolbar { display: flex; gap: 18px; margin-bottom: 12px; color: #5e81ac; padding: 0 5px; }
+        .toolbar svg { width: 22px; height: 22px; cursor: pointer; }
+        .input-wrapper { display: flex; gap: 10px; }
+        .input-wrapper input[type="text"] { flex: 1; margin: 0; background: white; }
+        .input-wrapper button { width: auto; padding: 0 24px; margin: 0; background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #2e3440; border-radius: 12px; }
+        #video-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 999; display: flex; flex-direction: column; }
+        video { width: 100%; flex: 1; object-fit: cover; }
+        .video-controls { position: absolute; bottom: 40px; width: 100%; text-align: center; }
+        .video-controls button { background: #bf616a; width: 64px; height: 64px; border-radius: 50%; padding: 0; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="auth-view" class="auth-container">
+        <div class="app-title">Aether</div>
+        <div class="app-subtitle">无手机号注册 · AI 构建人格</div>
+        <input type="text" id="username" placeholder="输入任意登录 ID">
+        <input type="password" id="password" placeholder="设置密钥">
+        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin: 15px auto; width: fit-content;"></div>
+        <button onclick="handleRegister()">初始化 AI 盲盒并跃迁</button>
+        <p id="auth-msg" style="color: #bf616a; font-size: 13px; margin-top: 15px;"></p>
+    </div>
+    <div id="chat-view" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
+        <div class="chat-header"><span id="my-nickname">信号连接中...</span></div>
+        <div class="chat-messages" id="message-list"></div>
+        <div class="chat-input-area">
+            <div class="toolbar">
+                <svg title="建立全息视频" onclick="startVideoCall()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            </div>
+            <div class="input-wrapper">
+                <input type="text" id="msg-input" placeholder="输入讯息..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+    <div id="video-container" class="hidden">
+        <video id="remote-video" autoplay playsinline></video>
+        <video id="local-video" autoplay playsinline muted style="position: absolute; top: 40px; right: 20px; width: 110px; height: 160px; border: 2px solid rgba(255,255,255,0.5); border-radius: 12px;"></video>
+        <div class="video-controls"><button onclick="endVideoCall()" style="color: white; font-weight: bold;">切断</button></div>
+    </div>
+</div>
+
+<script>
+    const API_REGISTER_URL = "https://aether-api.huumoo-bc5.workers.dev/api/register"; 
+    const WS_URL = "wss://aether-api.huumoo-bc5.workers.dev"; 
+
+    let currentUser = null;
+    let ws = null;
+    let peerConnection = null;
+    let localStream = null;
+    const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+
+    async function handleRegister() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const msgEl = document.getElementById('auth-msg');
+        if (!user || !pass) { msgEl.innerText = "请提供识别码！"; return; }
+        
+        msgEl.style.color = "#5e81ac";
+        msgEl.innerText = "正在请求 Gemini 生成人格，写入数据库...";
+        
+        try {
+            const res = await fetch(API_REGISTER_URL, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+            const data = await res.json();
+            if(data.error) throw new Error(data.error);
+            
+            currentUser = { nickname: data.profile.nickname, avatar: data.profile.avatar };
+            enterChat();
+        } catch (e) {
+            msgEl.style.color = "#bf616a";
+            msgEl.innerText = "错误: " + e.message + " (如果已注册，可直接测试登录)";
+            setTimeout(() => { enterChat(); }, 1500); 
+        }
+    }
+
+    function enterChat() {
+        if(!currentUser) currentUser = { nickname: "流浪者", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=guest" };
+        document.getElementById('auth-view').classList.add('hidden');
+        document.getElementById('chat-view').classList.remove('hidden');
+        document.getElementById('my-nickname').innerText = `已连接 · ${currentUser.nickname}`;
+        
+        ws = new WebSocket(WS_URL);
+        ws.onmessage = async (event) => {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'chat') { appendMessage(msg.content, false, msg.avatar); }
+            else if (msg.type === 'offer') { await handleReceiveOffer(msg.offer); }
+            else if (msg.type === 'answer') { await peerConnection.setRemoteDescription(new RTCSessionDescription(msg.answer)); }
+            else if (msg.type === 'ice-candidate') { await peerConnection.addIceCandidate(new RTCIceCandidate(msg.candidate)); }
+        };
+        appendMessage("系统: 欢迎加入 Aether 网络，您可以开始文字或视频通讯了。", false, "https://api.dicebear.com/7.x/bottts/svg?seed=system");
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('msg-input');
+        const text = input.value.trim();
+        if (!text) return;
+        appendMessage(text, true, currentUser.avatar); 
+        ws.send(JSON.stringify({ type: 'chat', content: text, avatar: currentUser.avatar }));
+        input.value = '';
+    }
+
+    function appendMessage(content, isSelf, avatarSrc) {
+        const list = document.getElementById('message-list');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${isSelf ? 'self' : ''}`;
+        msgDiv.innerHTML = `<img class="avatar" src="${avatarSrc}"><div class="message-content">${content}</div>`;
+        list.appendChild(msgDiv);
+        list.scrollTop = list.scrollHeight; 
+    }
+
+    async function startVideoCall() {
+        document.getElementById('video-container').classList.remove('hidden');
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('local-video').srcObject = localStream;
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        peerConnection.ontrack = (e) => { document.getElementById('remote-video').srcObject = e.streams[0]; };
+        peerConnection.onicecandidate = (e) => { if (e.candidate) ws.send(JSON.stringify({ type: 'ice-candidate', candidate: e.candidate })); };
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        ws.send(JSON.stringify({ type: 'offer', offer: offer }));
+    }
+
+    async function handleReceiveOffer(offer) {
+        document.getElementById('video-container').classList.remove('hidden');
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('local-video').srcObject = localStream;
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        peerConnection.ontrack = (e) => { document.getElementById('remote-video').srcObject = e.streams[0]; };
+        peerConnection.onicecandidate = (e) => { if (e.candidate) ws.send(JSON.stringify({ type: 'ice-candidate', candidate: e.candidate })); };
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        ws.send(JSON.stringify({ type: 'answer', answer: answer }));
+    }
+
+    function endVideoCall() {
+        document.getElementById('video-container').classList.add('hidden');
+        if (peerConnection) peerConnection.close();
+        if (localStream) localStream.getTracks().forEach(track => track.stop());
+    }
+</script>
+</body>
+</html>
