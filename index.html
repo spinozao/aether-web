@@ -11,37 +11,30 @@
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); display: flex; flex-direction: column; height: 100vh; justify-content: center; align-items: center; }
         .hidden { display: none !important; }
         #app { max-width: 400px; width: 100%; height: 90vh; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); border-radius: 24px; box-shadow: 0 8px 32px rgba(31,38,135,0.15); display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        
         .auth-container { padding: 40px 30px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; }
         .app-title { font-size: 32px; font-weight: 600; color: #3b4252; margin-bottom: 5px; }
         .app-subtitle { font-size: 13px; color: #5e81ac; margin-bottom: 30px; }
         input[type="text"], input[type="password"] { width: 100%; padding: 14px; margin: 10px 0; background: rgba(255,255,255,0.8); border: 1px solid #e5e9f0; border-radius: 12px; box-sizing: border-box; outline: none; }
-        
         button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; margin-top: 15px; }
         .btn-outline { background: transparent; color: #764ba2; border: 2px solid #764ba2; margin-top: 10px; }
-        
         .chat-header { background: rgba(255,255,255,0.5); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.5); font-weight: 600; color: #2e3440; backdrop-filter: blur(5px); cursor: pointer; position: relative; }
         .admin-btn { position: absolute; right: 20px; top: 22px; font-size: 12px; color: #88c0d0; cursor: pointer; }
-        
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message { display: flex; align-items: flex-end; gap: 10px; }
         .message.self { flex-direction: row-reverse; }
         .message-content { background: white; padding: 12px 16px; border-radius: 18px 18px 18px 4px; max-width: 70%; word-wrap: break-word; font-size: 14px; color: #4c566a; }
         .message.self .message-content { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); border-radius: 18px 18px 4px 18px; color: #2e3440; }
         .avatar { width: 36px; height: 36px; border-radius: 50%; background: #eceff4; }
-        
         .chat-input-area { padding: 15px; background: rgba(255,255,255,0.5); border-top: 1px solid rgba(255,255,255,0.5); }
         .toolbar { display: flex; gap: 18px; margin-bottom: 12px; color: #5e81ac; padding: 0 5px; }
         .toolbar svg { width: 22px; height: 22px; cursor: pointer; }
         .input-wrapper { display: flex; gap: 10px; }
         .input-wrapper input[type="text"] { flex: 1; margin: 0; background: white; }
         .input-wrapper button { width: auto; padding: 0 24px; margin: 0; background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #2e3440; border-radius: 12px; }
-        
         #video-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; display: flex; flex-direction: column; }
         video { width: 100%; flex: 1; object-fit: cover; }
         .video-controls { position: absolute; bottom: 40px; width: 100%; text-align: center; }
         .video-controls button { background: #bf616a; width: 64px; height: 64px; border-radius: 50%; padding: 0; }
-
         #admin-panel { padding: 20px; flex: 1; overflow-y: auto; background: rgba(255,255,255,0.8); }
         table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; border-radius: 8px; overflow: hidden; }
         th, td { padding: 10px; text-align: left; background: white; border-bottom: 1px solid #eee; font-size: 13px; }
@@ -56,7 +49,6 @@
         <input type="text" id="username" placeholder="输入识别码 (ID)">
         <input type="password" id="password" placeholder="设置或输入密钥">
         <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin: 15px auto; width: fit-content;"></div>
-        
         <button onclick="handleAuth(false)">初始化 AI 盲盒 (注册)</button>
         <button class="btn-outline" onclick="handleAuth(true)">跃迁登录 (已有账号)</button>
         <p id="auth-msg" style="color: #bf616a; font-size: 13px; margin-top: 15px; min-height: 16px;"></p>
@@ -67,9 +59,7 @@
             <span id="my-nickname">信号连接中...</span>
             <span class="admin-btn" onclick="toggleAdmin(event)">中枢管理</span>
         </div>
-        
         <div class="chat-messages" id="message-list"></div>
-        
         <div class="chat-input-area">
             <div class="toolbar">
                 <svg title="建立全息视频" onclick="startVideoCall()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
@@ -99,7 +89,6 @@
 </div>
 
 <script>
-    // 已经为你硬编码了真实的云端 Worker 节点
     const API_BASE = "https://aether-api.huumoo-bc5.workers.dev"; 
     const WS_URL = "wss://aether-api.huumoo-bc5.workers.dev"; 
 
@@ -109,12 +98,10 @@
     let localStream = null;
     const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
-    // --- 1. 认证模块 (真实拉取数据库) ---
     async function handleAuth(isLogin = false) {
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
         const msgEl = document.getElementById('auth-msg');
-        
         if (!user || !pass) { msgEl.innerText = "请提供识别码与密钥！"; return; }
         
         msgEl.style.color = "#5e81ac";
@@ -129,7 +116,7 @@
             const data = await res.json();
             if(data.error) throw new Error(data.error);
             
-            currentUser = data.profile; // 获取完整资料
+            currentUser = data.profile; 
             enterChat();
         } catch (e) {
             msgEl.style.color = "#bf616a";
@@ -137,13 +124,11 @@
         }
     }
 
-    // --- 2. 初始化大厅与二维码名片 ---
     function enterChat() {
         document.getElementById('auth-view').classList.add('hidden');
         document.getElementById('chat-view').classList.remove('hidden');
         document.getElementById('my-nickname').innerText = `${currentUser.nickname} (${currentUser.zodiac})`;
         
-        // 生成专属二维码名片容器
         const qrContainer = document.createElement('div');
         qrContainer.id = "my-qrcode";
         qrContainer.style.display = "none";
@@ -159,15 +144,13 @@
         qrContainer.style.textAlign = "center";
         document.getElementById('app').appendChild(qrContainer);
         
-        // 渲染二维码
         new QRCode(qrContainer, {
             text: `aether:addfriend:${currentUser.username}`, 
             width: 160, height: 160, colorDark : "#2e3440", colorLight : "#ffffff"
         });
 
-        // 绑定点击昵称显示/隐藏二维码与简介
         document.getElementById('header-area').onclick = (e) => {
-            if(e.target.className === 'admin-btn') return; // 点管理按钮不触发
+            if(e.target.className === 'admin-btn') return; 
             const display = qrContainer.style.display;
             qrContainer.style.display = display === 'none' ? 'block' : 'none';
             if(qrContainer.style.display === 'block' && qrContainer.children.length === 2) {
@@ -178,7 +161,6 @@
             }
         };
 
-        // 建立 WebSocket 长连接
         ws = new WebSocket(WS_URL);
         ws.onmessage = async (event) => {
             const msg = JSON.parse(event.data);
@@ -187,11 +169,9 @@
             else if (msg.type === 'answer') { await peerConnection.setRemoteDescription(new RTCSessionDescription(msg.answer)); }
             else if (msg.type === 'ice-candidate') { await peerConnection.addIceCandidate(new RTCIceCandidate(msg.candidate)); }
         };
-        
         appendMessage("系统: 欢迎加入 Aether 网络。点击上方昵称可查看您的二维码名片与AI简史。", false, "https://api.dicebear.com/7.x/bottts/svg?seed=system");
     }
 
-    // --- 3. 消息与渲染 ---
     function sendMessage() {
         const input = document.getElementById('msg-input');
         const text = input.value.trim();
@@ -210,7 +190,6 @@
         list.scrollTop = list.scrollHeight; 
     }
 
-    // --- 4. WebRTC 全息视频通话 ---
     async function startVideoCall() {
         document.getElementById('video-container').classList.remove('hidden');
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -244,16 +223,14 @@
         if (localStream) localStream.getTracks().forEach(track => track.stop());
     }
 
-    // --- 5. 后台中枢管理 (拉取数据库列表) ---
     async function toggleAdmin(event) {
-        event.stopPropagation(); // 阻止触发显示二维码
+        event.stopPropagation(); 
         if (currentUser?.role !== 'admin') {
             alert("权限不足：你需要管理员权限才能访问中枢。 (请用账号 admin 注册/登录)");
             return;
         }
         document.getElementById('chat-view').classList.add('hidden');
         document.getElementById('admin-panel').classList.remove('hidden');
-
         try {
             const res = await fetch(API_BASE + "/api/admin/users");
             const users = await res.json();
@@ -263,9 +240,7 @@
                 <td><button style="padding: 4px 8px; font-size: 12px; width:auto; background: #bf616a; border-radius:4px;">阻断</button></td></tr>`;
             });
             document.getElementById('admin-table').innerHTML = tableHTML;
-        } catch (e) {
-            alert("拉取数据失败：" + e.message);
-        }
+        } catch (e) { alert("拉取数据失败：" + e.message); }
     }
 </script>
 </body>
