@@ -3,230 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title id="site-title-meta">虫洞漂流 | 留下你在银河系的痕迹</title>
+    <title>虫洞漂流瓶 | 宇宙尽头的孤岛</title>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap');
         
         :root {
-            --gemini-bg: #080816;
-            --gemini-nebula: #151835;
-            --star-glow: rgba(180, 200, 255, 0.7);
-            --border-white: rgba(255, 255, 255, 0.15);
+            --bg-deep: #020205; /* 极度深邃的黑 */
+            --nebula-blue: rgba(18, 25, 45, 0.6);
+            --nebula-purple: rgba(15, 10, 30, 0.4);
+            --text-main: #e2e8f0;
         }
 
-        body, html { margin: 0; padding: 0; width: 100%; height: 100vh; overflow: hidden; font-family: 'Noto Sans SC', sans-serif; background-color: var(--gemini-bg); color: #fff; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100vh; overflow: hidden; font-family: 'Noto Sans SC', sans-serif; background-color: var(--bg-deep); color: var(--text-main); }
         
-        /* ================= 1. Gemini 风量子星空动态背景 ================= */
+        /* ================= 极度真实的星云背景 ================= */
         .universe-canvas {
-            position: absolute; width: 200%; height: 200%; top: -50%; left: -50%; z-index: 1; pointer-events: none;
-            background: radial-gradient(circle at 50% 50%, var(--gemini-nebula) 0%, #050510 50%, #000 100%);
-            animation: cosmicPulses 25s ease-in-out infinite alternate;
-        }
-        @keyframes cosmicPulses {
-            0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { transform: scale(1.08) rotate(3deg); opacity: 0.9; }
+            position: absolute; width: 100vw; height: 100vh; top: 0; left: 0; z-index: 1; pointer-events: none;
+            background: 
+                radial-gradient(ellipse at 30% 40%, var(--nebula-blue) 0%, transparent 45%),
+                radial-gradient(ellipse at 70% 60%, var(--nebula-purple) 0%, transparent 50%),
+                var(--bg-deep);
         }
 
-        /* ================= 2. HUD 头部悬浮控制指挥中心 ================= */
-        .hud-header { position: absolute; top: 0; left: 0; width: 100%; padding: 20px 24px; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .hud-logo { font-size: 24px; font-weight: 700; letter-spacing: 3px; text-shadow: 0 0 20px rgba(255,255,255,0.4); color: #f1f5f9; }
-        .hud-actions { display: flex; gap: 12px; align-items: center; }
-        
-        .cosmic-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border-white); color: #f8fafc; padding: 10px 20px; border-radius: 24px; cursor: pointer; backdrop-filter: blur(16px); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 13px; font-weight: 500; }
-        .cosmic-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); box-shadow: 0 0 20px rgba(255,255,255,0.25); }
-        .btn-accent { background: rgba(58, 134, 255, 0.25); border-color: rgba(58, 134, 255, 0.4); }
-        .btn-accent:hover { background: rgba(58, 134, 255, 0.4); box-shadow: 0 0 25px rgba(58, 134, 255, 0.5); }
-        .btn-admin { background: rgba(255, 36, 66, 0.2); border-color: rgba(255, 36, 66, 0.3); color: #ff4d6d; }
-
-        /* ================= 3. 漂流星空物理容器 ================= */
+        /* ================= 极慢太空漫步与呼吸 ================= */
         .drift-space { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; overflow: hidden; }
         
-        /* 星星量子发光与太空漂浮动画 */
-        @keyframes starFloating {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(20px, -30px) scale(1.05); }
-            100% { transform: translate(0, 0) scale(1); }
+        /* 增加可点击热区，视觉上星星很小，但容易点到 */
+        .star-hitbox {
+            position: absolute; width: 40px; height: 40px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 20;
+            /* 极慢的漫步感，每颗星星随机生成自己的偏移量 */
+            animation: cosmicWander 120s infinite ease-in-out alternate;
         }
-        @keyframes starBreathing {
-            0% { box-shadow: 0 0 12px 2px rgba(255,255,255,0.2); opacity: 0.6; }
-            50% { box-shadow: 0 0 30px 10px var(--star-glow); opacity: 1; }
-            100% { box-shadow: 0 0 12px 2px rgba(255,255,255,0.2); opacity: 0.6; }
+        
+        @keyframes cosmicWander {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(var(--tx), var(--ty)); }
         }
-        .star-node { position: absolute; background: #ffffff; border-radius: 50%; cursor: pointer; animation: starFloating 20s infinite ease-in-out, starBreathing 5s infinite ease-in-out; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .star-node:hover { transform: scale(1.6) !important; z-index: 50; background: #e0f2fe; box-shadow: 0 0 45px 15px rgba(186,230,253,1) !important; }
 
-        /* ================= 4. 高级太空舱玻璃拟态弹窗 ================= */
-        .cosmic-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 2, 6, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 500; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        /* 真实的星星视觉：极小、纯白、带微光 */
+        .star-core {
+            background: #ffffff; border-radius: 50%;
+            box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.7);
+            animation: starBreathe 6s infinite alternate ease-in-out;
+            transition: all 0.5s;
+        }
+        
+        @keyframes starBreathe {
+            0% { opacity: 0.4; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* 明亮的星星带十字星芒 */
+        .star-bright .star-core { box-shadow: 0 0 12px 2px rgba(200, 220, 255, 0.9); }
+        .star-bright::before, .star-bright::after {
+            content: ''; position: absolute; background: rgba(255, 255, 255, 0.4); border-radius: 50%;
+        }
+        .star-bright::before { width: 1px; height: 18px; }
+        .star-bright::after { width: 18px; height: 1px; }
+
+        .star-hitbox:hover .star-core { transform: scale(3); box-shadow: 0 0 20px 5px rgba(255, 255, 255, 1); background: #dbeafe; }
+
+        /* ================= 电影级极慢展开弹窗 ================= */
+        .cosmic-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
+            z-index: 500; display: flex; justify-content: center; align-items: center; 
+            /* 极慢极慢的显现 */
+            opacity: 0; pointer-events: none; transition: opacity 2.5s ease-in-out; 
+        }
         .cosmic-overlay.active { opacity: 1; pointer-events: auto; }
         
-        .capsule-panel { background: rgba(13, 13, 28, 0.7); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 24px rgba(255,255,255,0.04); border-radius: 28px; padding: 32px; width: 92%; max-width: 540px; color: #f1f5f9; position: relative; max-height: 85vh; display: flex; flex-direction: column; animation: panelSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes panelSlide { 0% { transform: translateY(30px) scale(0.95); } 100% { transform: translateY(0) scale(1); } }
+        .capsule-panel { 
+            background: rgba(10, 12, 20, 0.85); border: 1px solid rgba(255,255,255,0.08); 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02); 
+            border-radius: 20px; padding: 35px 30px; width: 90%; max-width: 500px; 
+            color: #e2e8f0; position: relative; max-height: 80vh; display: flex; flex-direction: column; 
+            /* 极慢极慢的展开动画 */
+            transform: translateY(30px) scale(0.96); transition: transform 2.5s cubic-bezier(0.2, 0.8, 0.2, 1); 
+        }
+        .cosmic-overlay.active .capsule-panel { transform: translateY(0) scale(1); }
         
-        .exit-icon { position: absolute; top: 22px; right: 26px; cursor: pointer; color: #64748b; font-size: 26px; transition: 0.2s; }
-        .exit-icon:hover { color: #f1f5f9; text-shadow: 0 0 10px #fff; }
+        .exit-icon { position: absolute; top: 20px; right: 25px; cursor: pointer; color: #64748b; font-size: 26px; transition: 0.3s; }
+        .exit-icon:hover { color: #fff; }
 
-        /* 表单控件 */
-        input[type="text"], input[type="password"], textarea, select { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 14px; border-radius: 14px; margin-bottom: 16px; box-sizing: border-box; outline: none; font-size: 14px; transition: 0.2s; }
-        input:focus, textarea:focus, select:focus { border-color: #3a86ff; box-shadow: 0 0 12px rgba(58,134,255,0.3); background: rgba(0,0,0,0.6); }
-        textarea { height: 110px; resize: none; }
+        /* HUD 控制台 */
+        .hud-header { position: absolute; top: 0; left: 0; width: 100%; padding: 25px; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .hud-logo { font-size: 20px; font-weight: 300; letter-spacing: 4px; color: rgba(255,255,255,0.7); }
+        .cosmic-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; padding: 10px 22px; border-radius: 30px; cursor: pointer; backdrop-filter: blur(10px); transition: 0.4s; font-size: 13px; font-weight: 300; letter-spacing: 1px; }
+        .cosmic-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
 
-        /* 嵌套滚动区域 */
-        .capsule-scroll { flex: 1; overflow-y: auto; padding-right: 8px; margin-bottom: 16px; }
-        .capsule-scroll::-webkit-scrollbar { width: 5px; }
-        .capsule-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        /* 内容区排版 */
+        input, textarea { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; outline: none; font-size: 14px; font-family: inherit; font-weight: 300; transition: 0.3s; }
+        input:focus, textarea:focus { border-color: rgba(255,255,255,0.4); background: rgba(0,0,0,0.8); }
+        textarea { height: 100px; resize: none; }
+        .capsule-scroll { flex: 1; overflow-y: auto; padding-right: 10px; }
+        .capsule-scroll::-webkit-scrollbar { width: 3px; }
+        .capsule-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
 
-        /* 帖子元素 */
-        .star-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-        .star-meta img { width: 48px; height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: #000; object-fit: cover; }
-        .planet-badge { font-size: 11px; color: #93c5fd; background: rgba(58,134,255,0.15); padding: 3px 10px; border-radius: 20px; font-weight: bold; margin-left: 6px; }
-        .star-txt { font-size: 15px; line-height: 1.6; color: #cbd5e1; margin-bottom: 16px; word-break: break-all; }
-        .star-img-preview { max-width: 100%; border-radius: 14px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); }
-        audio { height: 36px; border-radius: 20px; outline: none; margin-bottom: 16px; width: 100%; background: #000; }
-
-        /* 工具条 */
-        .media-bar { display: flex; gap: 10px; margin-bottom: 16px; }
-        .media-btn { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 12px; border-radius: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 13px; transition: 0.2s; }
-        .media-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
-        .recording-pulse { background: rgba(239, 68, 68, 0.25) !important; border-color: #ef4444 !important; color: #f87171 !important; animation: recordBlink 1s infinite; }
-        @keyframes recordBlink { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-
-        /* 回复节点 */
-        .echo-node { border-top: 1px solid rgba(255,255,255,0.08); padding: 16px 0; }
-        .annihilate-btn { float: right; color: #f87171; font-size: 12px; cursor: pointer; background: rgba(239,68,68,0.1); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.2); }
-        .annihilate-btn:hover { background: #ef4444; color: #fff; }
-
-        /* 后台管理面板 Tab 切换 */
-        .admin-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; gap: 10px; }
-        .tab-lnk { padding: 10px 16px; color: #94a3b8; cursor: pointer; border-bottom: 2px solid transparent; font-size: 14px; }
-        .tab-lnk.active { color: #3a86ff; border-color: #3a86ff; font-weight: bold; }
+        /* 帖子与回音 */
+        .star-meta { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .star-meta img { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: #000; }
+        .planet-badge { font-size: 10px; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 20px; margin-left: 8px; letter-spacing: 1px; }
+        .star-txt { font-size: 15px; line-height: 1.8; color: #f1f5f9; margin-bottom: 20px; font-weight: 300; }
+        .echo-node { border-top: 1px dashed rgba(255,255,255,0.1); padding: 15px 0; margin-top: 10px; }
+        .echo-node .star-txt { font-size: 13px; color: #94a3b8; margin-bottom: 5px; }
+        .echo-node .star-meta img { width: 28px; height: 28px; }
     </style>
 </head>
 <body>
     <div class="universe-canvas"></div>
     
     <div class="hud-header">
-        <div class="hud-logo" id="site-logo-text">虫洞漂流</div>
-        <div class="hud-actions">
-            <span style="color:#94a3b8; font-size:13px; display:none;" id="hud-user-info"></span>
-            <button class="cosmic-btn" onclick="openModal('auth-overlay')" id="btn-login-gate">建立时空对接</button>
-            <button class="cosmic-btn btn-admin" onclick="openModal('admin-overlay')" id="btn-admin-gate" style="display:none;">引力控制台</button>
-            <button class="cosmic-btn btn-accent" onclick="openModal('broadcast-overlay')" id="btn-broadcast-gate" style="display:none;">发射新星讯号</button>
-            <button class="cosmic-btn" onclick="logout宇宙()" id="btn-logout-gate" style="display:none;">脱离矩阵</button>
+        <div class="hud-logo">WORMHOLE DRIFTING</div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <span style="color:rgba(255,255,255,0.4); font-size:12px; display:none;" id="hud-user-info"></span>
+            <button class="cosmic-btn" onclick="openModal('auth-overlay')" id="btn-login-gate">对接空间站</button>
+            <button class="cosmic-btn" onclick="openModal('broadcast-overlay')" id="btn-broadcast-gate" style="display:none; background:rgba(255,255,255,0.15);">发射讯号</button>
+            <button class="cosmic-btn" onclick="logout宇宙()" id="btn-logout-gate" style="display:none; border:none;">切断连接</button>
         </div>
     </div>
 
+    <!-- 深邃星空物理层 -->
     <div class="drift-space" id="starfield-space-layer"></div>
 
+    <!-- 弹窗一：对接 -->
     <div class="cosmic-overlay" id="auth-overlay">
         <div class="capsule-panel">
             <div class="exit-icon" onclick="closeModal('auth-overlay')">×</div>
-            <h2 style="margin-top:0; letter-spacing:1px;">空间站节点认证</h2>
-            <p style="color:#64748b; font-size:13px; margin-bottom:24px; line-height:1.4;">未注册的账号在初次连接时，造物主引擎将自动为您分配超现实数字外壳及随机母星归属地。</p>
-            <input type="text" id="auth-username" placeholder="输入星际通信频段 (ID账号)">
-            <input type="password" id="auth-password" placeholder="设置空间站独立暗号 (密码)">
-            <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin: 5px auto; width: fit-content;"></div>
-            <button class="cosmic-btn btn-accent" style="width:100%; margin-top:12px; font-size:15px; padding:12px;" onclick="executeAuth(false)">初始化跃迁 (注册绑定)</button>
-            <button class="cosmic-btn" style="width:100%; margin-top:12px; background:transparent;" onclick="executeAuth(true)">返回已知坐标 (登录母星)</button>
-            <p id="auth-error-log" style="color:#f87171; font-size:12px; text-align:center; margin-top:12px; min-height:14px;"></p>
+            <h2 style="font-weight:300; letter-spacing:2px; margin-top:0;">身份核验</h2>
+            <p style="color:rgba(255,255,255,0.4); font-size:12px; margin-bottom:30px;">随机分配母星与代号。</p>
+            <input type="text" id="auth-username" placeholder="输入星际波段 (账号)">
+            <input type="password" id="auth-password" placeholder="空间站秘钥 (密码)">
+            <button class="cosmic-btn" style="width:100%; margin-top:10px; background:rgba(255,255,255,0.1);" onclick="executeAuth(false)">注册流浪者</button>
+            <button class="cosmic-btn" style="width:100%; margin-top:10px; border:none;" onclick="executeAuth(true)">登录母星</button>
+            <p id="auth-error-log" style="color:#f87171; font-size:12px; text-align:center; margin-top:15px;"></p>
         </div>
     </div>
 
+    <!-- 弹窗二：发星 -->
     <div class="cosmic-overlay" id="broadcast-overlay">
         <div class="capsule-panel">
             <div class="exit-icon" onclick="closeModal('broadcast-overlay')">×</div>
-            <h2 style="margin-top:0;">创造并推入轨道一颗新星</h2>
-            <textarea id="broadcast-text" placeholder="在这颗群星里留下你想说的话，即使跨越亿万光年也会闪烁..."></textarea>
-            
-            <div class="media-bar">
-                <label class="media-btn">📸 附带星际影像<input type="file" id="broadcast-file-img" accept="image/*" style="display:none;"></label>
-                <button class="media-btn" id="broadcast-rec-btn" onclick="handleVoiceCapture('broadcast')">🎤 刻录语音(30s限制)</button>
-            </div>
-            <div id="broadcast-media-preview" style="color:#94a3b8; font-size:12px; margin-bottom:12px; text-align:center;"></div>
-
-            <button class="cosmic-btn btn-accent" style="width:100%; padding:14px; font-size:16px;" onclick="blastStarToOrbit()">发射进入引力轨道</button>
-            <p id="broadcast-error-log" style="color:#f87171; font-size:12px; text-align:center; margin-top:12px;"></p>
+            <h2 style="font-weight:300; letter-spacing:2px; margin-top:0;">留下痕迹</h2>
+            <textarea id="broadcast-text" placeholder="即使跨越亿万光年也会闪烁..."></textarea>
+            <button class="cosmic-btn" style="width:100%; background:rgba(255,255,255,0.1);" onclick="blastStarToOrbit()">发射进入轨道</button>
         </div>
     </div>
 
+    <!-- 弹窗三：极慢阅读与回音 -->
     <div class="cosmic-overlay" id="read-overlay">
-        <div class="capsule-panel" style="max-width: 620px; width:94%; height: 86vh;">
+        <div class="capsule-panel" style="height: 75vh;">
             <div class="exit-icon" onclick="closeModal('read-overlay')">×</div>
-            <div class="capsule-scroll" id="observation-scroll-zone">
-                </div>
+            <div class="capsule-scroll" id="observation-scroll-zone"></div>
             
-            <div id="echo-interaction-wrapper" style="display:none; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
-                <textarea id="echo-input-text" placeholder="发送你的星际回音对抗虚无..." style="height: 55px; margin-bottom:10px;"></textarea>
-                <div class="media-bar" style="margin-bottom:0;">
-                    <label class="media-btn" style="flex:0 0 50px; padding:10px 0;">📸<input type="file" id="echo-file-img" accept="image/*" style="display:none;"></label>
-                    <button class="media-btn" style="flex:0 0 50px; padding:10px 0;" id="echo-rec-btn" onclick="handleVoiceCapture('echo')">🎤</button>
-                    <button class="cosmic-btn btn-accent" style="flex:1;" onclick="transmitEchoSignal()">发射回音波</button>
-                </div>
-                <div id="echo-media-preview" style="color:#94a3b8; font-size:12px; margin-top:6px; text-align:center;"></div>
+            <div id="echo-interaction-wrapper" style="display:none; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px; margin-top:10px;">
+                <textarea id="echo-input-text" placeholder="向虚空发送回音..." style="height: 60px; margin-bottom:10px;"></textarea>
+                <button class="cosmic-btn" style="width:100%; background:rgba(255,255,255,0.1);" onclick="transmitEchoSignal()">发射</button>
             </div>
-            <div id="echo-guest-blocker" style="text-align:center; color:#64748b; font-size:13px; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
-                💡 您当前处于匿名流浪模式，无法激发回音。请先建立时空对接。
+            <div id="echo-guest-blocker" style="text-align:center; color:rgba(255,255,255,0.3); font-size:12px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px; margin-top:10px;">
+                匿名观测模式。请对接空间站以发送回音。
             </div>
-        </div>
-    </div>
-
-    <div class="cosmic-overlay" id="admin-overlay">
-        <div class="capsule-panel" style="max-width:650px; width:95%; height:80vh;">
-            <div class="exit-icon" onclick="closeModal('admin-overlay')">×</div>
-            <h2 style="margin-top:0; color:#ff4d6d;">大一统引力控制中心</h2>
-            
-            <div class="admin-tabs">
-                <div class="tab-lnk active" id="tab-lnk-site" onclick="switchAdminTab('site')">时空矩阵设值</div>
-                <div class="tab-lnk" id="tab-lnk-users" onclick="switchAdminTab('users')">流浪者审查</div>
-            </div>
-
-            <div class="capsule-scroll" id="admin-tab-content-area">
-                </div>
         </div>
     </div>
 
 <script>
-    // 自动接入你的高并发高免费云端中枢大脑
     const API_BASE = "https://aether-api.huumoo-bc5.workers.dev"; 
+    let currentUser = null; let currentlyObservedStarId = null;
 
-    let currentUser = null;
-    let currentlyObservedStarId = null;
-    let interstellarLock = false; // 排他锁，防止多开星星突发错乱
-
-    // --- 录音物理状态缓存 ---
-    let voiceRecorder = null;
-    let voiceChunks = [];
-    let recordActiveState = false;
-    let recordTimerClock = null;
-    let b64AudioCache = { broadcast: null, echo: null };
-
-    // --- 动态系统设值本地初始化配置 ---
-    function syncDynamicSiteConfig() {
-        const storedName = localStorage.getItem('lhs_bbs_name') || '虫洞漂流';
-        document.getElementById('site-logo-text').innerText = storedName;
-        document.title = `${storedName} | 标记宇宙级别的思绪`;
-    }
-
-    // --- 1. 深度鉴权绑定逻辑 ---
     async function executeAuth(isLoginMode) {
         const u = document.getElementById('auth-username').value.trim();
         const p = document.getElementById('auth-password').value.trim();
-        const logger = document.getElementById('auth-error-log');
-        if (!u || !p) return logger.innerText = "时空秘钥频段不可留空！";
-        logger.innerText = "正在穿透物理层数据网格...";
-        
+        if (!u || !p) return;
         try {
             const res = await fetch(API_BASE + (isLoginMode ? "/api/login" : "/api/register"), {
                 method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({username:u, password:p})
             });
             const data = await res.json();
             if(data.error) throw new Error(data.error);
-            currentUser = data.profile;
-            closeModal('auth-overlay');
-            applyHUDStatusChange();
-        } catch (e) { logger.innerText = "对接入局中断: " + e.message; }
+            currentUser = data.profile; closeModal('auth-overlay'); applyHUDStatusChange();
+        } catch (e) { document.getElementById('auth-error-log').innerText = e.message; }
     }
 
     function applyHUDStatusChange() {
@@ -234,290 +192,128 @@
             document.getElementById('btn-login-gate').style.display = 'none';
             document.getElementById('btn-broadcast-gate').style.display = 'block';
             document.getElementById('btn-logout-gate').style.display = 'block';
-            const display = document.getElementById('hud-user-info');
-            display.style.display = 'block';
-            display.innerHTML = `📍 坐标: ${currentUser.planet} <img src="${currentUser.avatar}" style="width:22px; height:22px; vertical-align:middle; border-radius:8px; margin-left:6px; background:#000;">`;
-            
             document.getElementById('echo-interaction-wrapper').style.display = 'block';
             document.getElementById('echo-guest-blocker').style.display = 'none';
-
-            if(currentUser.role === 'admin') {
-                document.getElementById('btn-admin-gate').style.display = 'block';
-            }
         } else {
             document.getElementById('btn-login-gate').style.display = 'block';
             document.getElementById('btn-broadcast-gate').style.display = 'none';
             document.getElementById('btn-logout-gate').style.display = 'none';
-            document.getElementById('btn-admin-gate').style.display = 'none';
-            document.getElementById('hud-user-info').style.display = 'none';
             document.getElementById('echo-interaction-wrapper').style.display = 'none';
             document.getElementById('echo-guest-blocker').style.display = 'block';
         }
         scanAstronomyUniverse();
     }
-
     function logout宇宙() { currentUser = null; applyHUDStatusChange(); }
 
-    // --- 2. 群星漂流与排他阅读交互引擎 ---
+    // ================= 渲染极度真实的深空漫步 =================
     async function scanAstronomyUniverse() {
         try {
             const res = await fetch(API_BASE + "/api/stars");
             const stars = await res.json();
             const space = document.getElementById('starfield-space-layer');
-            space.innerHTML = ''; // 清刷旧星轨
+            space.innerHTML = ''; 
 
             stars.forEach(star => {
-                const node = document.createElement('div');
-                node.className = 'star-node';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'star-hitbox';
                 
-                // 根据文字丰满度智能赋予物理体积 (16px 到 40px)
-                const textLen = star.content ? star.content.length : 0;
-                const size = Math.min(Math.max(textLen * 0.8 + 14, 15), 42);
-                node.style.width = size + 'px';
-                node.style.height = size + 'px';
+                // 真实星星的大小分布（极小，1px 到 3px）
+                const starSize = (Math.random() * 2 + 1) + 'px';
                 
-                // 空间散落几率分布
-                node.style.left = (Math.random() * 82 + 9) + '%';
-                node.style.top = (Math.random() * 78 + 12) + '%';
-                
-                // 包含多媒体的富矿星星绽放淡粉色引力圈
-                if (star.image_data || star.audio_data) {
-                    node.style.boxShadow = "0 0 20px 5px rgba(239,68,68,0.5)";
-                    node.style.background = "#fed7aa";
-                }
-                
-                // 随机悬浮飘荡延迟差
-                node.style.animationDelay = (Math.random() * -15) + 's';
+                // 是否是明亮的十字星芒
+                const isBright = Math.random() > 0.85;
+                if(isBright) wrapper.classList.add('star-bright');
 
-                node.onclick = () => {
-                    if(interstellarLock) return; // 互斥保护
-                    focusObserveStar(star);
-                };
-                space.appendChild(node);
+                const core = document.createElement('div');
+                core.className = 'star-core';
+                core.style.width = starSize;
+                core.style.height = starSize;
+                core.style.animationDelay = `-${Math.random() * 6}s`;
+
+                // 随机分布整个屏幕
+                wrapper.style.left = (Math.random() * 90 + 5) + '%';
+                wrapper.style.top = (Math.random() * 90 + 5) + '%';
+                
+                // 赋予每颗星独特的极慢漫步轨迹 (60s 到 150s 游荡一次)
+                const driftDuration = Math.random() * 90 + 60;
+                wrapper.style.animationDuration = `${driftDuration}s`;
+                wrapper.style.animationDelay = `-${Math.random() * 90}s`;
+                // 随机游荡方向 (-40px 到 40px)
+                wrapper.style.setProperty('--tx', (Math.random() * 80 - 40) + 'px');
+                wrapper.style.setProperty('--ty', (Math.random() * 80 - 40) + 'px');
+
+                wrapper.onclick = () => focusObserveStar(star);
+                wrapper.appendChild(core);
+                space.appendChild(wrapper);
             });
-        } catch (e) { console.error("天文台光谱捕捉失败", e); }
+        } catch (e) {}
     }
 
+    // ================= 极慢展开阅读 =================
     async function focusObserveStar(star) {
-        interstellarLock = true; // 挂上排他锁
         currentlyObservedStarId = star.id;
         openModal('read-overlay');
-        const viewArea = document.getElementById('read-content-area');
         const scrollZone = document.getElementById('observation-scroll-zone');
-        scrollZone.innerHTML = `<div style="text-align:center; padding:30px; color:#64748b;">正在解调 [${star.planet}] 发出的量子纠缠电波...</div>`;
+        scrollZone.innerHTML = `<div style="text-align:center; padding:40px; color:rgba(255,255,255,0.3); font-weight:300;">正在解析量子电波...</div>`;
         
         try {
             const res = await fetch(API_BASE + "/api/replies/" + star.id);
             const echoReplies = await res.json();
             
-            let domStream = compileStarUnitHTML(star, true);
-            if (echoReplies.length > 0) {
-                domStream += `<div style="margin:24px 0 12px 0; font-size:13px; color:#64748b; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:6px;">🌌 捕获到星际回音 (${echoReplies.length})</div>`;
-                echoReplies.forEach(reply => {
-                    domStream += compileStarUnitHTML(reply, false);
-                });
-            } else {
-                domStream += `<div style="text-align:center; margin-top:40px; font-size:12px; color:#475569;">这片虚空尚未激荡出任何回音。</div>`;
-            }
-            scrollZone.innerHTML = domStream;
-        } catch (e) { scrollZone.innerHTML = `<div style="color:#ef4444;">信号断裂: 无法完整解析多维空间。</div>`; }
-    }
-
-    function compileStarUnitHTML(data, isHostStar) {
-        let mediaSegment = '';
-        if (data.image_data) mediaSegment += `<img src="${data.image_data}" class="star-img-preview">`;
-        if (data.audio_data) mediaSegment += `<audio src="${data.audio_data}" controls playsinline></audio>`;
-        
-        let superKillBtn = (currentUser && currentUser.role === 'admin') 
-            ? `<span class="annihilate-btn" onclick="obliterateStarData(${data.id}, ${isHostStar})">降维抹除</span>` : '';
-
-        return `
-            <div class="${isHostStar ? '' : 'echo-node'}">
+            let domStream = `
                 <div class="star-meta">
-                    <img src="${data.avatar_url || data.avatar}">
-                    <div style="flex:1;">
-                        <div style="font-weight:700; color:#f8fafc; font-size:14px;">${data.nickname} ${superKillBtn}</div>
-                        <div style="margin-top:2px; display:flex; align-items:center; gap:8px;">
-                            <span class="planet-badge">${data.planet}</span>
-                            <span style="font-size:11px; color:#475569;">${new Date(data.created_at).toLocaleString()}</span>
-                        </div>
+                    <img src="${star.avatar_url || star.avatar}">
+                    <div>
+                        <div style="color:rgba(255,255,255,0.8); font-size:14px; font-weight:400;">${star.nickname}</div>
+                        <div style="margin-top:4px;"><span class="planet-badge">${star.planet}</span></div>
                     </div>
                 </div>
-                <div class="star-txt">${data.content}</div>
-                ${mediaSegment}
-            </div>
-        `;
-    }
-
-    // --- 3. 高级当前 Canvas 像素下裁剪压缩存储器 ---
-    function compressQuantumImage(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const targetWidth = 300; // 极限下采样至 300px
-                    const scale = targetWidth / img.width;
-                    canvas.width = targetWidth;
-                    canvas.height = img.height * scale;
-                    
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.5)); // 0.5 高密极压
-                };
-            };
-        });
-    }
-
-    // --- 4. 太空 30 秒倒计时对讲机组件 ---
-    async function handleVoiceCapture(mode) {
-        const btn = document.getElementById(`${mode}-rec-btn`);
-        const indicator = document.getElementById(`${mode}-media-preview`);
-        
-        if (recordActiveState) {
-            voiceRecorder.stop();
-            btn.classList.remove('recording-pulse');
-            btn.innerText = "🎤";
-            clearTimeout(recordTimerClock);
-            recordActiveState = false;
-        } else {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                voiceRecorder = new MediaRecorder(stream);
-                voiceChunks = [];
-                
-                voiceRecorder.ondataavailable = (e) => voiceChunks.push(e.data);
-                voiceRecorder.onstop = () => {
-                    const audioBlob = new Blob(voiceChunks, { type: 'audio/webm' });
-                    const fileReader = new FileReader();
-                    fileReader.readAsDataURL(audioBlob);
-                    fileReader.onloadend = () => {
-                        b64AudioCache[mode] = fileReader.result;
-                        indicator.innerText = "🚀 太空声波录制完毕，转化为量子密文";
-                    };
-                    stream.getTracks().forEach(t => t.stop());
-                };
-
-                voiceRecorder.start();
-                recordActiveState = true;
-                btn.classList.add('recording-pulse');
-                
-                let remaining = 30;
-                btn.innerText = `🎙️ 广播中 (${remaining}s)`;
-                
-                recordTimerClock = setInterval(() => {
-                    remaining--;
-                    btn.innerText = `🎙️ 广播中 (${remaining}s)`;
-                    if(remaining <= 0) {
-                        handleVoiceCapture(mode); // 智能切断
-                    }
-                }, 1000);
-
-            } catch (e) { alert("通讯被阻断：未能取得空间站麦克风采样授权！"); }
-        }
-    }
-
-    // --- 5. 双流多媒体发射系统 ---
-    async function transmitCosmicPack(mode, requestUrl) {
-        const content = document.getElementById(`${mode}-input-text` || `${mode}-text`).value.trim();
-        const imgInput = document.getElementById(`${mode}-file-img`);
-        let compressedImg = null;
-
-        if (!content && !imgInput.files[0] && !b64AudioCache[mode]) {
-            return alert("无法发射空无一物的量子湮灭包裹！");
-        }
-
-        if(imgInput.files[0]) {
-            compressedImg = await compressQuantumImage(imgInput.files[0]);
-        }
-
-        try {
-            const res = await fetch(requestUrl, {
-                method: "POST", headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({
-                    username: currentUser.username, nickname: currentUser.nickname,
-                    avatar: currentUser.avatar, planet: currentUser.planet,
-                    content: content, image_data: compressedImg, audio_data: b64AudioCache[mode]
-                })
-            });
-            if(!res.ok) throw new Error("外部虚空压力太大，发射包被排挤");
-
-            // 清表重置
-            if(document.getElementById(`${mode}-input-text`)) document.getElementById(`${mode}-input-text`).value = "";
-            if(document.getElementById(`${mode}-text`)) document.getElementById(`${mode}-text`).value = "";
-            imgInput.value = "";
-            b64AudioCache[mode] = null;
-            document.getElementById(`${mode}-media-preview`).innerText = "";
-
-            if(mode === 'broadcast') { closeModal('broadcast-overlay'); scanAstronomyUniverse(); }
-            if(mode === 'echo') { focusObserveStar({ id: currentlyObservedStarId, planet: '原发射源' }); }
-        } catch (e) { alert(e.message); }
-    }
-
-    function blastStarToOrbit() { transmitCosmicPack('broadcast', API_BASE + "/api/stars"); }
-    function transmitEchoSignal() { transmitCosmicPack('echo', API_BASE + "/api/replies/" + currentlyObservedStarId); }
-
-    // --- 6. 后台引力管控逻辑一览 ---
-    function switchAdminTab(targetTab) {
-        document.querySelectorAll('.tab-lnk').forEach(el => el.classList.remove('active'));
-        document.getElementById(`tab-lnk-${targetTab}`).classList.add('active');
-        const canvas = document.getElementById('admin-tab-content-area');
-
-        if(targetTab === 'site') {
-            canvas.innerHTML = `
-                <div style="padding:10px 0;">
-                    <label style="font-size:13px; color:#64748b; display:block; margin-bottom:6px;">修改时空矩阵基准名 (网站名称)</label>
-                    <input type="text" id="cfg-site-name" value="${localStorage.getItem('lhs_bbs_name') || '虫洞漂流'}">
-                    
-                    <label style="font-size:13px; color:#64748b; display:block; margin-bottom:6px;">时空量子索引特征 (SEO 关键词)</label>
-                    <input type="text" id="cfg-site-keys" value="${localStorage.getItem('lhs_bbs_keys') || '宇宙, 漂流, BBS'}">
-                    
-                    <button class="cosmic-btn btn-accent" style="width:100%; padding:12px;" onclick="saveGlobalMatrixSettings()">写入全局时空物理层</button>
-                </div>
+                <div class="star-txt">${star.content}</div>
             `;
-        } else if (targetTab === 'users') {
-            canvas.innerHTML = `<div style="color:#64748b; font-size:13px; text-align:center; padding:20px;">正在对同步在册的灵体进行穿透扫描...</div>`;
-            fetch(API_BASE + "/api/admin/users").then(r => r.json()).then(users => {
-                let listHTML = `<table><tr><th>频率ID</th><th>AI赋名</th><th>所属母星</th><th>权限</th></tr>`;
-                users.forEach(u => {
-                    listHTML += `<tr><td>${u.username}</td><td>${u.nickname}</td><td>${u.planet}</td><td>${u.role}</td></tr>`;
+            
+            if (echoReplies.length > 0) {
+                domStream += `<div style="margin:40px 0 10px 0; font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px;">— 捕获到的宇宙回音 —</div>`;
+                echoReplies.forEach(reply => {
+                    domStream += `
+                        <div class="echo-node">
+                            <div class="star-meta" style="margin-bottom:10px;">
+                                <img src="${reply.avatar_url || reply.avatar}">
+                                <div style="color:rgba(255,255,255,0.6); font-size:12px;">${reply.nickname} <span style="opacity:0.5; margin-left:5px;">[${reply.planet}]</span></div>
+                            </div>
+                            <div class="star-txt">${reply.content}</div>
+                        </div>
+                    `;
                 });
-                listHTML += `</table>`;
-                canvas.innerHTML = listHTML;
-            });
-        }
-    }
-
-    function saveGlobalMatrixSettings() {
-        const newName = document.getElementById('cfg-site-name').value.trim();
-        const newKeys = document.getElementById('cfg-site-keys').value.trim();
-        if(!newName) return alert("名称空间不可陷入绝对虚无！");
-        
-        localStorage.setItem('lhs_bbs_name', newName);
-        localStorage.setItem('lhs_bbs_keys', newKeys);
-        syncDynamicSiteConfig();
-        alert("全局矩阵参数重写完毕！引力已修正。");
-    }
-
-    async function obliterateStarData(id, isHostStar) {
-        if(confirm("警告：此操作将动用高维灭绝武器，这颗星球及其产生的一切底层回音碎片都将被彻底二向箔化，是否执行？")) {
-            const res = await fetch(API_BASE + "/api/admin/delete/" + id, { method: "DELETE" });
-            if(res.ok) {
-                if(isHostStar) { closeModal('read-overlay'); scanAstronomyUniverse(); }
-                else { focusObserveStar({ id: currentlyObservedStarId, planet: '残存轨道' }); }
             }
-        }
+            scrollZone.innerHTML = domStream;
+        } catch (e) { scrollZone.innerHTML = `信号断裂。`; }
     }
 
-    // --- 7. 框架基础交互控制 ---
-    function openModal(id) { document.getElementById(id).classList.add('active'); if(id === 'admin-overlay') switchAdminTab('site'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); if(id === 'read-overlay') interstellarLock = false; }
+    async function blastStarToOrbit() {
+        const text = document.getElementById('broadcast-text').value.trim();
+        if(!text) return;
+        await fetch(API_BASE + "/api/stars", {
+            method: "POST", headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ username: currentUser.username, nickname: currentUser.nickname, avatar: currentUser.avatar, planet: currentUser.planet, content: text })
+        });
+        document.getElementById('broadcast-text').value = "";
+        closeModal('broadcast-overlay'); scanAstronomyUniverse();
+    }
 
-    // 全局物理启动
-    syncDynamicSiteConfig();
+    async function transmitEchoSignal() {
+        const text = document.getElementById('echo-input-text').value.trim();
+        if(!text) return;
+        await fetch(API_BASE + "/api/replies/" + currentlyObservedStarId, {
+            method: "POST", headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ username: currentUser.username, nickname: currentUser.nickname, avatar: currentUser.avatar, planet: currentUser.planet, content: text })
+        });
+        document.getElementById('echo-input-text').value = "";
+        focusObserveStar({ id: currentlyObservedStarId, planet: '刷新' });
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
     applyHUDStatusChange();
 </script>
 </body>
